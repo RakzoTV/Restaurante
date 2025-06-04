@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <configuracion-inicial v-if="configurar"/>
-    <login @logeado="onLog" v-if="!logeado && !configurar"></login>
+    <!--<login @logeado="onLog" v-if="!logeado && !configurar"></login>-->
     <cambiar-password v-if="cambiarPassword"></cambiar-password>
     <div v-if="logeado && !cambiarPassword">
       <encabezado @cerrar="onClose"/> 
@@ -18,15 +18,14 @@ import Login from './components/Usuarios/Login.vue'
 import CambiarPassword from './components/Usuarios/CambiarPassword.vue'
 import ConfiguracionInicial from './components/Configuracion/ConfiguracionInicial.vue'
 import Encabezado from './components/Encabezado.vue'
-import Pie from './components/Pie.vue'
 import HttpService from './Servicios/HttpService'
 
 export default {
-  components: { Encabezado, Pie, Login, CambiarPassword, ConfiguracionInicial },
+  components: { Encabezado, Login, CambiarPassword, ConfiguracionInicial },
   name: 'App',
 
   data: ()=> ({
-    logeado: false,
+    logeado: true,
     datos: "",
     cambiarPassword: false,
     configurar: false
