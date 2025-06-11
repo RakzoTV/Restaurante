@@ -94,8 +94,11 @@ function obtenerTotalVentas(){
 }
 
 function obtenerNumeroMesasOcupadas(){
-	$archivos = new FilesystemIterator("./mesas_ocupadas", FilesystemIterator::SKIP_DOTS);
-	return iterator_count($archivos);
+    if (!file_exists('./mesas_ocupadas')) {
+        mkdir('./mesas_ocupadas', 0777, true);
+    }
+    $archivos = new FilesystemIterator("./mesas_ocupadas", FilesystemIterator::SKIP_DOTS);
+    return iterator_count($archivos);
 }
 
 function obtenerVentasUsuario($fechaInicio, $fechaFin){

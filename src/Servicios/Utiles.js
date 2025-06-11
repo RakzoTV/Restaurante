@@ -4,7 +4,7 @@ const DIAS = ["Domingo" ,"Lunes" ,"Martes" ,"Miércoles" ,"Jueves" ,"Viernes" ,"
 
 const Utiles =  {
 	generarUrlImagen(imagen){
-		return "http://localhost/botanero-ventas/api" + imagen
+		return "http://localhost:81/restaurante/api" + imagen
 	},
 	generarGrafica(array, contenedor, grafica, id){
 		this.resetearGrafica(contenedor, grafica, id)

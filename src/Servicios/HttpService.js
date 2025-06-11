@@ -1,7 +1,7 @@
-const RUTA_GLOBAL = "http://localhost/botanero-ventas/api/"
+const RUTA_GLOBAL = "http://localhost:81/restaurante/api/"
 
 const HttpService = {
-    async registrar(datos, ruta){
+    async registrar(datos, ruta) {
         const respuesta = await fetch(RUTA_GLOBAL + ruta, {
             method: "post",
             body: JSON.stringify(datos),
@@ -10,17 +10,22 @@ const HttpService = {
         return resultado
     },
 
-    async obtenerConDatos(datos, ruta){
+    async obtenerConDatos(datos, ruta) {
         const respuesta = await fetch(RUTA_GLOBAL + ruta, {
             method: "post",
             body: JSON.stringify(datos),
         });
-        let resultado = await respuesta.json()
-        return resultado
+        const text = await respuesta.text();
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            console.error("Respuesta no válida del servidor:", text);
+            throw new Error("Respuesta no válida del servidor: " + text);
+        }
     },
 
 
-    async obtener(ruta){
+    async obtener(ruta) {
         let respuesta = await fetch(RUTA_GLOBAL + ruta)
         let datos = await respuesta.json()
         return datos
@@ -35,6 +40,9 @@ const HttpService = {
         return resultado
     }
 
+
 }
 
-export default  HttpService 
+
+
+export default HttpService 
