@@ -59,6 +59,7 @@
             </b-navbar-item>
         </template>
 
+        <!--
         <template #end>
             <b-navbar-item tag="div">
                 <div class="buttons">
@@ -72,6 +73,7 @@
                 </div>
             </b-navbar-item>
         </template>
+        -->
     </b-navbar>
 </template>
 <script>
