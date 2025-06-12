@@ -1,50 +1,76 @@
 <template>
-    <section class="hero is-fullheight fondo">
-       
-        <div class="hero-body">
-           
-            <div class="container">
-        <p class="title is-1 has-text-weight-bold has-text-white has-text-centered titulo">
-            Sistema para restaurantes o venta de comida <br>
-            <b-icon
-                icon="account"
-                size="is-large"
-                >
-            </b-icon>
-            Iniciar sesión
-        </p> 
-            <div class="columns is-centered">
-                <div class="column is-5-tablet is-6-desktop is-6-widescreen" >
-                <form action="" class="box">
-                    <img src="@/assets/logo_principal.png" alt="" height="150" width="150" style="display: block; margin:0 auto;">
-                    <p class="title is-3 has-text-centered"></p>
-                    <b-field>
-                        <b-input placeholder="Correo electrónico"
-                            type="email"
-                            icon="email"
-                            v-model="correo">
-                        </b-input>
-                    </b-field>
-
-                    <b-field>
-                        <b-input type="password"
-                            placeholder="Contraseña"
-                            v-model="password"
-                            password-reveal>
-                        </b-input>
-                    </b-field>
-
-                    <div class="field has-text-centered">
-                    <b-button icon-left="login" type="is-primary" size="is-large" @click="ingresar">Ingresar</b-button>
-                    </div>
-                </form>
-                </div>
-            </div>        
-            <b-loading :is-full-page="true" v-model="cargando" :can-cancel="false"></b-loading>
+    <section class="min-h-screen flex items-center justify-center" style="background-color: #FFF8F1;">
+        <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+            <div class="mb-8 text-center">
+                <h1 class="text-3xl font-bold mb-2" style="color: #4E342E;">Iniciar sesión</h1>
+                <p class="text-base" style="color: #4E342E;">Sistema para restaurantes o venta de comida</p>
             </div>
+            <form @submit.prevent="ingresar">
+                <div class="mb-5">
+                    <label class="block mb-1" for="correo" style="color: #4E342E;">Correo electrónico</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center justify-center w-10 pointer-events-none text-[#4E342E]">
+                            <i class="fas fa-envelope"></i>
+                        </span>
+                        <input
+                            id="correo"
+                            type="email"
+                            v-model="correo"
+                            placeholder="Correo electrónico"
+                            class="w-full pl-12 pr-4 py-2 border rounded-lg focus:outline-none"
+                            style="color: #4E342E; border-color: #FF6F00;"
+                            @focus="e => e.target.style.boxShadow='0 0 0 2px #FF6F00'"
+                            @blur="e => e.target.style.boxShadow='none'"
+                            autocomplete="username"
+                        />
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label class="block mb-1" for="password" style="color: #4E342E;">Contraseña</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center justify-center w-10 pointer-events-none text-[#4E342E]">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <input
+                            :type="mostrarPassword ? 'text' : 'password'"
+                            id="password"
+                            v-model="password"
+                            placeholder="Contraseña"
+                            class="w-full pl-12 pr-10 py-2 border rounded-lg focus:outline-none"
+                            style="color: #4E342E; border-color: #FF6F00;"
+                            @focus="e => e.target.style.boxShadow='0 0 0 2px #FF6F00'"
+                            @blur="e => e.target.style.boxShadow='none'"
+                            autocomplete="current-password"
+                        />
+                        <button
+                            type="button"
+                            @click="mostrarPassword = !mostrarPassword"
+                            class="absolute inset-y-0 right-0 flex items-center px-3 text-[#4E342E] focus:outline-none"
+                            tabindex="-1"
+                        >
+                            <i :class="mostrarPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex justify-center">
+                    <button
+                        type="submit"
+                        class="w-full py-2 px-4 font-semibold rounded-lg shadow-md transition duration-200 flex items-center justify-center"
+                        :disabled="cargando"
+                        style="background-color: #FF6F00; color: white;"
+                        @mouseover="e => e.target.style.backgroundColor='#E65100'"
+                        @mouseleave="e => e.target.style.backgroundColor='#FF6F00'"
+                    >
+                        <span v-if="!cargando"><i class="fas fa-sign-in-alt mr-2"></i>Ingresar</span>
+                        <span v-else><i class="fas fa-spinner fa-spin mr-2"></i>Cargando...</span>
+                    </button>
+                </div>
+            </form>
+            <b-loading :is-full-page="true" v-model="cargando" :can-cancel="false"></b-loading>
         </div>
     </section>
 </template>
+
 <script>
 import HttpService from '../../Servicios/HttpService'
 
@@ -52,21 +78,22 @@ export default {
     name: "Login",
 
     data: () => ({
-        correo: "", 
+        correo: "",
         password: "",
-        cargando:false
+        cargando: false,
+        mostrarPassword: false
     }),
 
     methods: {
-        ingresar(){
-            if(!this.correo) {
+        ingresar() {
+            if (!this.correo) {
                 this.$buefy.toast.open({
                     message: 'Debes colocar el correo',
                     type: 'is-warning'
                 })
                 return
             }
-            if(!this.password) {
+            if (!this.password) {
                 this.$buefy.toast.open({
                     message: 'Debes colocar la contraseña',
                     type: 'is-warning'
@@ -80,57 +107,35 @@ export default {
             }
 
             HttpService.obtenerConDatos(payload, "iniciar_sesion.php")
-            .then(log => {
-                if(log.resultado === "cambia"){
-                   this.$buefy.toast.open({
-                        message: 'Datos correctos. Debes cambiar tu contraseña',
-                        type: 'is-info'
-                    })
-                    this.$emit("logeado", log)
-                    this.cargando = false
-                    return 
-                }
+                .then(log => {
+                    if (log.resultado === "cambia") {
+                        this.$buefy.toast.open({
+                            message: 'Datos correctos. Debes cambiar tu contraseña',
+                            type: 'is-info'
+                        })
+                        this.$emit("logeado", log)
+                        this.cargando = false
+                        return
+                    }
 
-                if(log.resultado) {
-                    this.$buefy.toast.open({
-                        message: 'Datos correctos. Bienvenido',
-                        type: 'is-success'
-                    })
-                    this.$emit("logeado", log)
-                    this.cargando = false
-                } else {
-                    this.$buefy.toast.open({
-                        message: 'Datos incorrectos. Verifica tu información',
-                        type: 'is-danger'
-                    })
-                    this.cargando = false
-                }
-            })
-            
+                    if (log.resultado) {
+                        this.$buefy.toast.open({
+                            message: 'Datos correctos. Bienvenido',
+                            type: 'is-success'
+                        })
+                        this.$emit("logeado", log)
+                        this.cargando = false
+                    } else {
+                        this.$buefy.toast.open({
+                            message: 'Datos incorrectos. Verifica tu información',
+                            type: 'is-danger'
+                        })
+                        this.cargando = false
+                    }
+                })
+
         }
     }
 
 }
 </script>
-<style>
-
- @import url('https://fonts.googleapis.com/css?family=Amaranth');
-.fondo {
-background-color: #54008C;
-background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 1000'%3E%3Cg fill-opacity='0.83'%3E%3Ccircle fill='%2354008C' cx='50' cy='0' r='50'/%3E%3Cg fill='%235b0092' %3E%3Ccircle cx='0' cy='50' r='50'/%3E%3Ccircle cx='100' cy='50' r='50'/%3E%3C/g%3E%3Ccircle fill='%23620098' cx='50' cy='100' r='50'/%3E%3Cg fill='%2369009d' %3E%3Ccircle cx='0' cy='150' r='50'/%3E%3Ccircle cx='100' cy='150' r='50'/%3E%3C/g%3E%3Ccircle fill='%236f00a3' cx='50' cy='200' r='50'/%3E%3Cg fill='%237600a9' %3E%3Ccircle cx='0' cy='250' r='50'/%3E%3Ccircle cx='100' cy='250' r='50'/%3E%3C/g%3E%3Ccircle fill='%237d00af' cx='50' cy='300' r='50'/%3E%3Cg fill='%238400b4' %3E%3Ccircle cx='0' cy='350' r='50'/%3E%3Ccircle cx='100' cy='350' r='50'/%3E%3C/g%3E%3Ccircle fill='%238b00ba' cx='50' cy='400' r='50'/%3E%3Cg fill='%239200c0' %3E%3Ccircle cx='0' cy='450' r='50'/%3E%3Ccircle cx='100' cy='450' r='50'/%3E%3C/g%3E%3Ccircle fill='%239900c6' cx='50' cy='500' r='50'/%3E%3Cg fill='%239f00cb' %3E%3Ccircle cx='0' cy='550' r='50'/%3E%3Ccircle cx='100' cy='550' r='50'/%3E%3C/g%3E%3Ccircle fill='%23a600d1' cx='50' cy='600' r='50'/%3E%3Cg fill='%23ad00d7' %3E%3Ccircle cx='0' cy='650' r='50'/%3E%3Ccircle cx='100' cy='650' r='50'/%3E%3C/g%3E%3Ccircle fill='%23b400dd' cx='50' cy='700' r='50'/%3E%3Cg fill='%23bb00e2' %3E%3Ccircle cx='0' cy='750' r='50'/%3E%3Ccircle cx='100' cy='750' r='50'/%3E%3C/g%3E%3Ccircle fill='%23c200e8' cx='50' cy='800' r='50'/%3E%3Cg fill='%23c800ee' %3E%3Ccircle cx='0' cy='850' r='50'/%3E%3Ccircle cx='100' cy='850' r='50'/%3E%3C/g%3E%3Ccircle fill='%23cf00f4' cx='50' cy='900' r='50'/%3E%3Cg fill='%23d600f9' %3E%3Ccircle cx='0' cy='950' r='50'/%3E%3Ccircle cx='100' cy='950' r='50'/%3E%3C/g%3E%3Ccircle fill='%23D0F' cx='50' cy='1000' r='50'/%3E%3C/g%3E%3C/svg%3E");
-background-attachment: fixed;
-background-size: contain;
-}
-
-   
-.titulo{
-    font-family: Amaranth, sans-serif;
-    text-align: center;
-    font-size: 75px;
-    letter-spacing: 2px;
-    word-spacing: 3px;
-    color: rgb(245, 251, 255);
-    text-shadow: rgb(0, 0, 0) -4px 2px 2px;
-}
-
-</style>

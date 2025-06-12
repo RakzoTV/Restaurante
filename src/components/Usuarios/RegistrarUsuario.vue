@@ -12,7 +12,7 @@
             <b-breadcrumb-item tag='router-link' to="/">Inicio</b-breadcrumb-item>
             <b-breadcrumb-item tag='router-link' to="/usuarios">Usuarios</b-breadcrumb-item>
         </b-breadcrumb>
-        <datos-usuario @registrado="onRegistrado" :usuario="usuario"></datos-usuario> 
+        <datos-usuario @registrado="onRegistrado" :usuario="usuario" :roles="roles"></datos-usuario>
         <b-loading :is-full-page="true" v-model="cargando" :can-cancel="false"></b-loading>
 
     </section>
@@ -29,10 +29,16 @@ export default ({
         usuario: {
             correo: "",
             nombre: "",
-            telefono: ""
+            telefono: "",
+            rol_id: "" // Agrega el campo rol_id
         },
-        cargando: false
+        cargando: false,
+        roles: [] // Lista de roles
     }),
+
+    mounted() {
+        this.obtenerRoles()
+    },
 
     methods: {
         onRegistrado(usuario){
@@ -42,19 +48,25 @@ export default ({
             .then(registrado => {
                 if(registrado) {
                     this.usuario = {
-                         correo: "",
+                        correo: "",
                         nombre: "",
-                        telefono: ""
+                        telefono: "",
+                        rol_id: ""
                     }
                     this.$buefy.toast.open({
-                        message: 'Usuario registrado. Recuerda que la contraseña por defecto es PacoHunterDev',
+                        message: 'Usuario registrado. Recuerda que la contraseña por defecto es 0000',
                         type: 'is-success'
                     })
                     this.cargando = false
                 }
             })
+        },
+        obtenerRoles() {
+            HttpService.obtener("obtener_roles.php")
+                .then(roles => {
+                    this.roles = roles
+                })
         }
     }
-
 })
 </script>

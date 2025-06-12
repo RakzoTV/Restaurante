@@ -6,12 +6,8 @@
         <b-field label="Tipo" >
             <b-select  v-model="insumo.tipo" @change.native="obtenerCategorias">
                 <option value="" disabled selected>Selecciona el tipo de insumo</option>
-                <option value="PLATILLO">
-                    Platillo
-                </option>
-                <option value="BEBIDA">
-                    Bebida
-                </option>
+                <option value="PLATILLO">Platillo</option>
+                <option value="BEBIDA">Bebida</option>
             </b-select>
         </b-field>
 
@@ -41,9 +37,24 @@
             <b-input type="number" placeholder="Precio de venta del insumo" v-model="insumo.precio"></b-input>
         </b-field>
         <div class="has-text-centered">
-            <b-button type="is-success" size="is-large" icon-left="check" @click="registrar">Registrar</b-button>
+            <b-button
+                :type="esEdicion ? 'is-info' : 'is-success'"
+                size="is-large"
+                :icon-left="esEdicion ? 'content-save' : 'check'"
+                @click="registrar"
+            >
+                {{ esEdicion ? 'Guardar cambios' : 'Registrar' }}
+            </b-button>
+            <b-button
+                type="is-danger"
+                size="is-large"
+                icon-left="close"
+                class="ml-2"
+                @click="$emit('cancelar')"
+            >
+                Cancelar
+            </b-button>
         </div>
-        
     </section>
 </template>
 <script>
@@ -52,14 +63,15 @@ import HttpService from '../../Servicios/HttpService'
 
 export default {
     name: "DatosInsumo",
-    props: ["insumo"],
+    props: {
+        insumo: { type: Object, required: true },
+        esEdicion: { type: Boolean, default: false }
+    },
 
     data: () => ({
         errores: [],
         categorias: []
     }),
-    
-
 
     methods: {
         registrar() {
@@ -77,12 +89,10 @@ export default {
         },
 
         obtenerCategorias() {
-          
-                HttpService.obtenerConDatos(this.insumo.tipo, "obtener_categorias_tipo.php")
+            HttpService.obtenerConDatos(this.insumo.tipo, "obtener_categorias_tipo.php")
                 .then(resultado => {
                     this.categorias = resultado
                 })
-            
         }
     }
 }

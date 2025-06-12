@@ -5,9 +5,8 @@
             <b-breadcrumb-item tag='router-link' to="/">Inicio</b-breadcrumb-item>
             <b-breadcrumb-item tag='router-link' to="/usuarios">Usuarios</b-breadcrumb-item>
         </b-breadcrumb>
-        <datos-usuario @registrado="onRegistrado" :usuario="usuario"></datos-usuario>        
+        <datos-usuario @registrado="onRegistrado" :usuario="usuario" :roles="roles"></datos-usuario>        
         <b-loading :is-full-page="true" v-model="cargando" :can-cancel="false"></b-loading>
-
     </section>
 </template>
 <script>
@@ -20,16 +19,20 @@ export default ({
 
     data: () => ({
         usuario: {},
-        cargando: false
+        cargando: false,
+        roles: [] // Agrega la lista de roles
     }),
 
     mounted() {
         this.cargando = true
+        // Obtener usuario
         HttpService.obtenerConDatos(this.$route.params.id, "obtener_usuario_id.php")
         .then(resultado => {
             this.usuario = resultado
             this.cargando = false
         })
+        // Obtener roles
+        this.obtenerRoles()
     },
 
     methods: {
@@ -49,6 +52,12 @@ export default ({
                     })
                 }
             })
+        },
+        obtenerRoles() {
+            HttpService.obtener("obtener_roles.php")
+                .then(roles => {
+                    this.roles = roles
+                })
         }
     }
 })

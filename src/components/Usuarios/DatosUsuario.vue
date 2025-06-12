@@ -12,7 +12,13 @@
         <b-field label="Teléfono" >
             <b-input type="text" placeholder="Teléfono del usuario" v-model="usuario.telefono"></b-input>
         </b-field>
-
+        <b-field label="Rol">
+            <b-select placeholder="Selecciona un rol" v-model="usuario.rol_id" required>
+                <option v-for="rol in roles" :key="rol.id" :value="rol.id">
+                    {{ rol.nombre }}
+                </option>
+            </b-select>
+        </b-field>
         <div class="has-text-centered">
             <b-button type="is-success" size="is-large" icon-left="check" @click="registrar">Registrar</b-button>
         </div>
@@ -23,7 +29,7 @@ import Utiles from '../../Servicios/Utiles'
 
 export default ({
     name: "DatosUsuario",
-    props: ["usuario"],
+    props: ["usuario", "roles"],
 
     data: () => ({
         errores: []
@@ -34,7 +40,8 @@ export default ({
             let datos = {
                 correo: this.usuario.correo,
                 nombre: this.usuario.nombre,
-                telefono: this.usuario.telefono
+                telefono: this.usuario.telefono,
+                rol_id: this.usuario.rol_id
             }
             this.errores = Utiles.validar(datos)
             if(this.errores.length > 0) return
