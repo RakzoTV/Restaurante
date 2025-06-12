@@ -9,33 +9,31 @@
           <span class="text-[#4E342E] text-base">{{ insumos.length }} resultados</span>
         </div>
       </div>
-      <router-link to="/registrar-insumo"
-        class="flex items-center px-5 py-2 rounded bg-[#FF6F00] hover:bg-[#E65100] text-white font-semibold transition">
+      <!-- Botón para abrir el modal de agregar insumo -->
+      <button
+        class="flex items-center px-5 py-2 rounded bg-orange-600 hover:bg-orange-700 text-white font-semibold transition"
+        @click="abrirModalRegistro">
         <i class="fas fa-plus mr-2"></i>
         Añadir insumo
-      </router-link>
+      </button>
     </div>
 
     <!-- Filtros superiores -->
     <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
-  <button
-    class="flex items-center px-4 py-2 rounded bg-orange-600 hover:bg-orange-700 text-white font-semibold transition z-10"
-    @click="filtrar = !filtrar"
-    type="button"
-  >
-    <i class="fas fa-filter mr-2"></i>
-    {{ filtrar ? 'Ocultar filtros' : 'Filtrar' }}
-  </button>
-  <select
-    v-model="perPage"
-    class="border rounded px-3 py-2 focus:ring-2 focus:ring-[#FF6F00] text-[#4E342E] max-w-xs"
-  >
-    <option value="5">5 por página</option>
-    <option value="10">10 por página</option>
-    <option value="15">15 por página</option>
-    <option value="20">20 por página</option>
-  </select>
-</div>
+      <button
+        class="flex items-center px-4 py-2 rounded bg-orange-600 hover:bg-orange-700 text-white font-semibold transition z-10"
+        @click="filtrar = !filtrar" type="button">
+        <i class="fas fa-filter mr-2"></i>
+        {{ filtrar ? 'Ocultar filtros' : 'Filtrar' }}
+      </button>
+      <select v-model="perPage"
+        class="border rounded px-3 py-2 focus:ring-2 focus:ring-[#FF6F00] text-[#4E342E] max-w-xs">
+        <option value="5">5 por página</option>
+        <option value="10">10 por página</option>
+        <option value="15">15 por página</option>
+        <option value="20">20 por página</option>
+      </select>
+    </div>
 
     <!-- Buscador general -->
     <div class="flex items-center mb-4">
@@ -125,14 +123,23 @@
       </table>
     </div>
     <b-loading :is-full-page="true" v-model="cargando" :can-cancel="false"></b-loading>
+
+    <!-- Modal para registrar insumo -->
+    <modal-insumo :visible.sync="modalRegistro" :esEdicion="false" :insumo="nuevoInsumo"
+      @registrado="recargarInsumos" />
+
+    <!-- Modal para editar insumo -->
+    <modal-insumo :visible.sync="modalEditar" :esEdicion="true" :insumo="insumoEditar" @registrado="actualizarInsumo" />
   </div>
 </template>
 
 <script>
 import HttpService from "../../Servicios/HttpService";
+import ModalInsumo from "./ModalInsumo.vue";
 
 export default {
   name: "Insumos",
+  components: { ModalInsumo },
 
   data: () => ({
     filtrar: false,
@@ -154,6 +161,25 @@ export default {
     sortIconSize: "is-small",
     currentPage: 1,
     perPage: 20,
+    modalRegistro: false,
+    modalEditar: false,
+    nuevoInsumo: {
+      tipo: "",
+      codigo: "",
+      nombre: "",
+      descripcion: "",
+      categoria: "",
+      precio: ""
+    },
+    insumoEditar: {
+      id: "",
+      tipo: "",
+      codigo: "",
+      nombre: "",
+      descripcion: "",
+      categoria: "",
+      precio: ""
+    }
   }),
 
   mounted() {
@@ -161,6 +187,58 @@ export default {
   },
 
   methods: {
+    abrirModalRegistro() {
+      this.nuevoInsumo = {
+        tipo: "",
+        codigo: "",
+        nombre: "",
+        descripcion: "",
+        categoria: "",
+        precio: ""
+      };
+      this.modalRegistro = true;
+    },
+
+    abrirModalEditar(insumo) {
+      // Haz una copia para evitar modificar el objeto original antes de guardar
+      this.insumoEditar = { ...insumo };
+      this.modalEditar = true;
+    },
+
+    recargarInsumos(insumo) {
+      // Registrar insumo en el backend
+      if (insumo) {
+        this.cargando = true;
+        HttpService.registrar(insumo, "registrar_insumo.php")
+          .then(() => {
+            this.obtenerInsumos();
+            this.modalRegistro = false;
+            this.cargando = false;
+            this.$buefy.toast.open("Insumo registrado correctamente");
+          });
+      } else {
+        this.obtenerInsumos();
+        this.modalRegistro = false;
+      }
+    },
+
+    actualizarInsumo(insumo) {
+      // Actualizar insumo en el backend
+      if (insumo) {
+        this.cargando = true;
+        HttpService.actualizar(insumo, "editar_insumo.php")
+          .then(() => {
+            this.obtenerInsumos();
+            this.modalEditar = false;
+            this.cargando = false;
+            this.$buefy.toast.open("Insumo actualizado correctamente");
+          });
+      } else {
+        this.obtenerInsumos();
+        this.modalEditar = false;
+      }
+    },
+
     busquedaAvanzada() {
       if (this.filtros.tipo === "BEBIDA" || this.filtros.tipo === "PLATILLO") {
         this.obtenerCategorias();
@@ -195,10 +273,11 @@ export default {
     },
 
     editar(idInsumo) {
-      this.$router.push({
-        name: "EditarInsumo",
-        params: { id: idInsumo },
-      });
+      // Busca el insumo por id y abre el modal de edición
+      const insumo = this.insumos.find(i => i.id === idInsumo);
+      if (insumo) {
+        this.abrirModalEditar(insumo);
+      }
     },
 
     obtenerInsumos() {

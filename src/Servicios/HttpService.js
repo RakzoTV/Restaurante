@@ -10,6 +10,15 @@ const HttpService = {
         return resultado
     },
 
+    async actualizar(datos, ruta) {
+        const respuesta = await fetch(RUTA_GLOBAL + ruta, {
+            method: "post",
+            body: JSON.stringify(datos),
+        });
+        let resultado = await respuesta.json()
+        return resultado
+    },
+
     async obtenerConDatos(datos, ruta) {
         const respuesta = await fetch(RUTA_GLOBAL + ruta, {
             method: "post",
