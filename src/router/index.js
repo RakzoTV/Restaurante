@@ -109,12 +109,10 @@ const router = new Router({
   ]
 })
 
-// Guard de roles
 router.beforeEach((to, from, next) => {
   let rol = (localStorage.getItem('rol') || '').toLowerCase();
-  if (rol === 'administrador') rol = 'admin';
+  if (rol === 'administrador') rol = 'admin' ;
   if (!rol) {
-    // Si no hay rol, redirige a perfil o login
     return next('/perfil');
   }
   if (to.meta && to.meta.roles && !to.meta.roles.includes(rol)) {
