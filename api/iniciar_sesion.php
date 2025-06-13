@@ -8,18 +8,19 @@ $respuesta = iniciarSesion($usuario->correo, $usuario->password);
 
 if($respuesta){
 
-	$usuario = [
-		"nombreUsuario" => $respuesta->nombre,
-		"idUsuario" => $respuesta->id
-	];
+    $usuario = [
+        "nombreUsuario" => $respuesta->nombre,
+        "idUsuario" => $respuesta->id,
+        "rol" => $respuesta->rol
+    ];
 
-	$verificaPass = verificarPassword("0000", $respuesta->id);
-	if($verificaPass) {
-		echo json_encode(["resultado" => "cambia", "datos" => $usuario]);
-		return;
-	}
+    $verificaPass = verificarPassword("0000", $respuesta->id);
+    if($verificaPass) {
+        echo json_encode(["resultado" => "cambia", "datos" => $usuario]);
+        return;
+    }
 
-	echo json_encode(["resultado" => true, "datos" => $usuario]);
+    echo json_encode(["resultado" => true, "datos" => $usuario]);
 } else {
-	echo json_encode(["resultado" => false]);
+    echo json_encode(["resultado" => false]);
 }

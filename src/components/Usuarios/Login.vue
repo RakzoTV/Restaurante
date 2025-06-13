@@ -85,56 +85,62 @@ export default {
     }),
 
     methods: {
-        ingresar() {
-            if (!this.correo) {
-                this.$buefy.toast.open({
-                    message: 'Debes colocar el correo',
-                    type: 'is-warning'
-                })
-                return
-            }
-            if (!this.password) {
-                this.$buefy.toast.open({
-                    message: 'Debes colocar la contraseña',
-                    type: 'is-warning'
-                })
-                return
-            }
-            this.cargando = true
-            let payload = {
-                correo: this.correo,
-                password: this.password
-            }
-
-            HttpService.obtenerConDatos(payload, "iniciar_sesion.php")
-                .then(log => {
-                    if (log.resultado === "cambia") {
-                        this.$buefy.toast.open({
-                            message: 'Datos correctos. Debes cambiar tu contraseña',
-                            type: 'is-info'
-                        })
-                        this.$emit("logeado", log)
-                        this.cargando = false
-                        return
-                    }
-
-                    if (log.resultado) {
-                        this.$buefy.toast.open({
-                            message: 'Datos correctos. Bienvenido',
-                            type: 'is-success'
-                        })
-                        this.$emit("logeado", log)
-                        this.cargando = false
-                    } else {
-                        this.$buefy.toast.open({
-                            message: 'Datos incorrectos. Verifica tu información',
-                            type: 'is-danger'
-                        })
-                        this.cargando = false
-                    }
-                })
-
+         ingresar() {
+        if (!this.correo) {
+            this.$buefy.toast.open({
+                message: 'Debes colocar el correo',
+                type: 'is-warning'
+            })
+            return
         }
+        if (!this.password) {
+            this.$buefy.toast.open({
+                message: 'Debes colocar la contraseña',
+                type: 'is-warning'
+            })
+            return
+        }
+        this.cargando = true
+        let payload = {
+            correo: this.correo,
+            password: this.password
+        }
+
+        HttpService.obtenerConDatos(payload, "iniciar_sesion.php")
+            .then(log => {
+                // Si el backend responde con datos de usuario y rol
+                if (log.datos && log.datos.rol) {
+                    let rol = (log.datos.rol || '').toLowerCase();
+                    if (rol === 'administrador') rol = 'admin';
+                    localStorage.setItem('rol', rol);
+                }
+
+                if (log.resultado === "cambia") {
+                    this.$buefy.toast.open({
+                        message: 'Datos correctos. Debes cambiar tu contraseña',
+                        type: 'is-info'
+                    })
+                    this.$emit("logeado", log)
+                    this.cargando = false
+                    return
+                }
+
+                if (log.resultado) {
+                    this.$buefy.toast.open({
+                        message: 'Datos correctos. Bienvenido',
+                        type: 'is-success'
+                    })
+                    this.$emit("logeado", log)
+                    this.cargando = false
+                } else {
+                    this.$buefy.toast.open({
+                        message: 'Datos incorrectos. Verifica tu información',
+                        type: 'is-danger'
+                    })
+                    this.cargando = false
+                }
+            })
+    }
     }
 
 }

@@ -1,15 +1,13 @@
 <template>
   <div id="app">
-    <configuracion-inicial v-if="configurar" @configurado="verificarInformacion" />
-    <template v-else>
-      <login @logeado="onLog" v-if="!logeado"></login>
-      <cambiar-password v-if="cambiarPassword"></cambiar-password>
-      <div v-if="logeado && !cambiarPassword">
-        <encabezado @cerrar="onClose">
-          <router-view />
-        </encabezado>
-      </div>
-    </template>
+    <configuracion-inicial v-if="configurar" />
+    <login @logeado="onLog" v-if="!logeado && !configurar"></login>
+    <cambiar-password v-if="cambiarPassword"></cambiar-password>
+    <div v-if="logeado && !cambiarPassword">
+      <encabezado @cerrar="onClose">
+        <router-view />
+      </encabezado>
+    </div>
   </div>
 </template>
 
