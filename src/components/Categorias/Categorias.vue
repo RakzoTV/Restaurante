@@ -1,206 +1,192 @@
 <template>
-    <div>
-        <br>
-        <p class="title is-1 has-text-weight-bold">
-            <b-icon
-                icon="archive-outline"
-                size="is-large"
-                type="is-primary">
-            </b-icon>
-            Categorías 
-            <b-button type="is-success" 
-            size="is-large"
-            icon-left="plus"
-            class="is-pulled-right"
-            @click="abrirModal('registra')">
-            Añadir categoría
-            </b-button>
-        </p>
-        
-        <b-select v-model="perPage" >
-            <option value="5">5 por página</option>
-            <option value="10">10 por página</option>
-            <option value="15">15 por página</option>
-            <option value="20">20 por página</option>
-        </b-select>
-        <b-table
-            :data="categorias"
-            :paginated="isPaginated"
-            :per-page="perPage"
-            :bordered="true"
-            :current-page.sync="currentPage"
-            :pagination-simple="isPaginationSimple"
-            :pagination-position="paginationPosition"
-            :default-sort-direction="defaultSortDirection"
-            :pagination-rounded="isPaginationRounded"
-            :sort-icon="sortIcon"
-            :sort-icon-size="sortIconSize"
-            aria-next-label="Next page"
-            aria-previous-label="Previous page"
-            aria-page-label="Page"
-            aria-current-label="Current page">
+    <div class="min-h-screen bg-[#FFF8F1] p-6">
+        <!-- Encabezado -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <div class="flex items-center">
+                <i class="fas fa-archive text-3xl mr-3 text-[#FF6F00]"></i>
+                <h1 class="text-2xl font-bold text-[#4E342E]">Categorías</h1>
+            </div>
+            <button
+                class="flex items-center px-5 py-2 rounded bg-orange-600 hover:bg-orange-700 text-white font-semibold transition mt-4 md:mt-0"
+                @click="abrirModal('registra')">
+                <i class="fas fa-plus mr-2"></i>
+                Añadir categoría
+            </button>
+        </div>
 
+        <!-- Select de paginación -->
+        <div class="mb-4">
+            <select v-model="perPage"
+                class="border rounded px-3 py-2 focus:ring-2 focus:ring-[#FF6F00] text-[#4E342E] bg-[#FFF8F1] max-w-xs">
+                <option value="5">5 por página</option>
+                <option value="10">10 por página</option>
+                <option value="15">15 por página</option>
+                <option value="20">20 por página</option>
+            </select>
+        </div>
 
-            <b-table-column field="icono" label=""  v-slot="props">
-                <b-icon
-                icon="noodles"
-                size="is-small"
-                v-if="props.row.tipo === 'PLATILLO'">
-                </b-icon>
+        <!-- Tabla de categorías -->
+        <div class="bg-white rounded-xl shadow-lg p-4 overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-2"></th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-[#4E342E] uppercase">Tipo</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-[#4E342E] uppercase">Nombre</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-[#4E342E] uppercase">Descripción</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-[#4E342E] uppercase">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="cat in categoriasPaginadas" :key="cat.id" class="hover:bg-[#FFF8F1]">
+                        <td class="px-4 py-2">
+                            <i v-if="cat.tipo === 'PLATILLO'" class="fas fa-bowl-food text-[#FF6F00]"></i>
+                            <i v-if="cat.tipo === 'BEBIDA'" class="fas fa-mug-saucer text-[#FF6F00]"></i>
+                        </td>
+                        <td class="px-4 py-2 text-[#4E342E]">{{ cat.tipo }}</td>
+                        <td class="px-4 py-2 text-[#4E342E]">{{ cat.nombre }}</td>
+                        <td class="px-4 py-2 text-[#4E342E]">{{ cat.descripcion }}</td>
+                        <td class="px-4 py-2 flex gap-2">
+                            <button
+                                class="flex items-center px-3 py-1 rounded bg-red-600 hover:bg-red-800 text-white text-xs font-semibold transition"
+                                @click="eliminar(cat)">
+                                <i class="fas fa-trash mr-1"></i> Eliminar
+                            </button>
+                            <button
+                                class="flex items-center px-3 py-1 rounded bg-blue-600 hover:bg-blue-800 text-white text-xs font-semibold transition"
+                                @click="editar(cat)">
+                                <i class="fas fa-pen mr-1"></i> Editar
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <!-- Paginación simple -->
+            <div class="flex justify-center mt-4 gap-2">
+                <button class="px-3 py-1 rounded bg-orange-600 hover:bg-orange-700 text-white font-semibold"
+                    :disabled="currentPage === 1" @click="currentPage--">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <span class="text-[#4E342E] font-semibold px-2">Página {{ currentPage }}</span>
+                <button class="px-3 py-1 rounded bg-orange-600 hover:bg-orange-700 text-white font-semibold"
+                    :disabled="currentPage === totalPages" @click="currentPage++">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
 
-                <b-icon
-                icon="cup"
-                size="is-small"
-                v-if="props.row.tipo === 'BEBIDA'">
-                </b-icon>
-            </b-table-column>
+        <modal-categoria :visible.sync="mostrarModalCategoria" @registrado="onRegistrado" :categoria="categoria"
+            :titulo="titulo" :tipo="tipo" />
 
-            <b-table-column field="tipo" label="Tipo" sortable v-slot="props">
-                {{ props.row.tipo }}
-            </b-table-column>
-
-            <b-table-column field="nombre" label="Nombre" sortable v-slot="props">
-                {{ props.row.nombre }}
-            </b-table-column>
-
-            <b-table-column field="descripcion" label="Descripción" sortable v-slot="props">
-                {{ props.row.descripcion }}
-            </b-table-column>
-
-            <b-table-column field="acciones" label="Acciones"  v-slot="props">
-                <b-button 
-                type="is-danger"
-                icon-left="delete"
-                @click="eliminar(props.row)">
-                    Eliminar
-                </b-button>
-
-                <b-button 
-                type="is-info"
-                icon-left="pen"
-                @click="editar(props.row)">
-                    Editar
-                </b-button>
-            </b-table-column>
-
-
-
-        </b-table>
+        <!-- Loading -->
         <b-loading :is-full-page="true" v-model="cargando" :can-cancel="false"></b-loading>
-
-         <b-modal
-           :active.sync="mostrarModalCategoria"
-            has-modal-card
-            trap-focus
-            :destroy-on-hide="false"
-            aria-role="dialog"
-            aria-label="Agregar categoría"
-            close-button-aria-label="Close"
-            aria-modal>
-            
-            <modal-categoria @registrado="onRegistrado" :categoria="categoria" :titulo="titulo" :tipo="tipo"></modal-categoria>
-            
-        </b-modal>
-        
     </div>
 </template>
+
 <script>
 import HttpService from '../../Servicios/HttpService'
 import ModalCategoria from './ModalCategoria.vue'
 export default {
     name: 'Categorias',
-    components: {
-            ModalCategoria
-        },
-        data() {
-            return {
-                mostrarModalCategoria: false,
-                estaRegistrando: false,
-                estaEditando: false,
-                titulo : "",
+    components: { ModalCategoria },
+    data() {
+        return {
+            mostrarModalCategoria: false,
+            estaRegistrando: false,
+            estaEditando: false,
+            titulo: "",
+            tipo: "",
+            categoria: {
                 tipo: "",
-                categoria: {
-                    tipo: "",
-                    nombre: "",
-                    descripcion: ""
-                },
-                categorias: [],
-                isPaginated: true,
-                isPaginationSimple: false,
-                isPaginationRounded: true,
-                paginationPosition: 'bottom',
-                defaultSortDirection: 'asc',
-                sortIcon: 'arrow-up',
-                sortIconSize: 'is-small',
-                currentPage: 1,
-                perPage: 10,
-             
-            }
-        },
+                nombre: "",
+                descripcion: ""
+            },
+            categorias: [],
+            isPaginated: true,
+            isPaginationSimple: false,
+            isPaginationRounded: true,
+            paginationPosition: 'bottom',
+            defaultSortDirection: 'asc',
+            sortIcon: 'arrow-up',
+            sortIconSize: 'is-small',
+            currentPage: 1,
+            perPage: 10,
+            cargando: false
+        }
+    },
 
-        created() {
-            this.obtenerCategorias()
+    computed: {
+        totalPages() {
+            return Math.ceil(this.categorias.length / this.perPage) || 1;
         },
+        categoriasPaginadas() {
+            const start = (this.currentPage - 1) * this.perPage;
+            return this.categorias.slice(start, start + parseInt(this.perPage));
+        }
+    },
 
-        methods: {
-            eliminar(categoria) {
-                this.$buefy.dialog.confirm({
-                    title: 'Eliminar categoría ' + categoria.nombre,
-                    message: '¿Seguro que deseas eliminar la categoría? Esta acción no se puede deshacer',
-                    confirmText: 'Sí, eliminar',
-                    cancelText: 'No, salir',
-                    type: 'is-danger',
-                    hasIcon: true,
-                    onConfirm: () => {
-                        this.cargando = true
-                        HttpService.eliminar("eliminar_categoria.php", categoria.id)
+    created() {
+        this.obtenerCategorias()
+    },
+
+    methods: {
+        eliminar(categoria) {
+            this.$buefy.dialog.confirm({
+                title: 'Eliminar categoría ' + categoria.nombre,
+                message: '¿Seguro que deseas eliminar la categoría? Esta acción no se puede deshacer',
+                confirmText: 'Sí, eliminar',
+                cancelText: 'No, salir',
+                type: 'is-danger',
+                hasIcon: true,
+                onConfirm: () => {
+                    this.cargando = true
+                    HttpService.eliminar("eliminar_categoria.php", categoria.id)
                         .then(eliminado => {
-                            if(eliminado) {
+                            if (eliminado) {
                                 this.obtenerCategorias()
                                 this.$buefy.toast.open('Categoría eliminada')
                                 this.cargando = false
                             }
                         })
-                        
-                    }
-                })
-            },
-
-            editar(categoria){
-                this.abrirModal("edita", categoria)
-            },
-
-            abrirModal(tipo, categoria = {}) {
-                this.categoria = categoria
-
-                this.mostrarModalCategoria = true
-                if(tipo === "registra") {
-                    this.tipo = tipo
-                    this.titulo = "Agregar "
                 }
-                if(tipo === "edita") {
-                    this.tipo = tipo
-                    this.titulo = "Editar "
-                }
-            },
+            })
+        },
 
-            onRegistrado(){
-                this.obtenerCategorias()
-                this.categoria = {
-                    tipo: "",
-                    nombre: "",
-                    descripcion: ""
-                }
-            },
+        editar(categoria) {
+            this.abrirModal("edita", categoria)
+        },
 
-            obtenerCategorias() {
-                this.cargando = true
-                HttpService.obtener("obtener_categorias.php")
-                .then(resultado =>{
+        abrirModal(tipo, categoria = {}) {
+            this.categoria = { ...categoria }
+            this.mostrarModalCategoria = true
+            if (tipo === "registra") {
+                this.tipo = tipo
+                this.titulo = "Agregar"
+            }
+            if (tipo === "edita") {
+                this.tipo = tipo
+                this.titulo = "Editar"
+            }
+        },
+
+        onRegistrado() {
+            this.obtenerCategorias()
+            this.categoria = {
+                tipo: "",
+                nombre: "",
+                descripcion: ""
+            }
+            this.mostrarModalCategoria = false
+        },
+
+        obtenerCategorias() {
+            this.cargando = true
+            HttpService.obtener("obtener_categorias.php")
+                .then(resultado => {
                     this.categorias = resultado
                     this.cargando = false
                 })
-            }
         }
+    }
 }
 </script>

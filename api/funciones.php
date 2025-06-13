@@ -563,7 +563,7 @@ function obtenerCategorias()
 function conectarBaseDatos()
 {
 	$host = "localhost";
-	$db   = "botanero_ventas";
+	$db   = "restaurante";
 	$user = "root";
 	$pass = "";
 	$charset = 'utf8mb4';

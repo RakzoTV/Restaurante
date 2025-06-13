@@ -1,220 +1,158 @@
 <template>
-  <section>
-    <br />
-    <nav class="level">
-      <div class="level-left">
-        <div class="level-item">
-            <p class="title is-1 has-text-weight-bold">
-                <b-icon icon="cash-register" size="is-large" type="is-primary"> </b-icon>
-                Reporte de ventas
-            </p>
-
-        </div>
+  <section class="min-h-screen bg-[#FFF8F1] p-6">
+    <!-- Encabezado -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+      <div class="flex items-center mb-4 md:mb-0">
+        <i class="fas fa-cash-register text-4xl mr-3 text-[#FF6F00]"></i>
+        <h1 class="text-3xl font-bold text-[#4E342E]">Reporte de ventas</h1>
       </div>
-
-      <div class="level-right">
-        <p class="level-item">
-            <span
-                class="has-background-success is-pulled-right has-text-white"
-                style="font-size:3.5em; padding: 10px"
-            >
-                Total ${{ totalVentas }}
-            </span>
-        </p>
+      <div>
+        <span class="inline-block bg-orange-600 text-white text-3xl font-bold rounded px-6 py-2 shadow">
+          Total ${{ totalVentas }}
+        </span>
       </div>
-    </nav>
-    
-    <div class="field is-grouped">
-      <p class="control">
-        <b-button class="mb-1" @click="recargar">
-          <b-icon icon="refresh"></b-icon>
-        </b-button>
-      </p>
-      <p class="control">
-        <b-button
-          type="is-primary"
-          icon-left="filter-variant"
-          @click="filtrar = !filtrar"
-          >Filtrar</b-button
-        >
-      </p>
-      <p class="control">
-        <b-select v-model="perPage">
-          <option value="5">5 por página</option>
-          <option value="10">10 por página</option>
-          <option value="15">15 por página</option>
-          <option value="20">20 por página</option>
-        </b-select>
-      </p>
     </div>
 
-    <div class="box" v-if="filtrar">
-      <b-field grouped group-multiline>
-        <b-field label="Selecciona un periodo de tiempo" expanded>
-          <b-datepicker
-            placeholder="Click para seleccionar..."
-            v-model="fechasSeleccionadas"
-            @input="buscarEnFecha"
-            icon="calendar-today"
-            range
-          >
-          </b-datepicker>
-        </b-field>
+    <!-- Filtros superiores -->
+    <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
+      <button
+        class="flex items-center px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-[#4E342E] font-semibold transition"
+        @click="recargar">
+        <i class="fas fa-sync-alt mr-2"></i> Recargar
+      </button>
+      <button
+        class="flex items-center px-4 py-2 rounded bg-[#FF6F00] hover:bg-[#E65100] text-white font-semibold transition"
+        @click="filtrar = !filtrar">
+        <i class="fas fa-filter mr-2"></i> Filtrar
+      </button>
+      <select v-model="perPage"
+        class="border rounded px-3 py-2 focus:ring-2 focus:ring-[#FF6F00] text-[#4E342E] bg-[#FFF8F1]">
+        <option value="5">5 por página</option>
+        <option value="10">10 por página</option>
+        <option value="15">15 por página</option>
+        <option value="20">20 por página</option>
+      </select>
+    </div>
 
-        <b-field label="Ventas por usuario" expanded>
-          <b-select
-            v-model="usuarioSeleccionado"
-            @change.native="buscarEnFecha"
-          >
+    <!-- Filtros avanzados -->
+    <div v-if="filtrar" class="bg-white rounded-xl shadow p-4 mb-6">
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1">
+          <label class="block mb-1 font-semibold text-[#4E342E]">Periodo de tiempo</label>
+          <div class="flex gap-2">
+            <input type="date" v-model="fechaInicio" @change="buscarEnFecha"
+              class="border rounded px-3 py-2 focus:ring-2 focus:ring-[#FF6F00] text-[#4E342E] bg-[#FFF8F1]" />
+            <span class="self-center text-[#4E342E]">a</span>
+            <input type="date" v-model="fechaFin" @change="buscarEnFecha"
+              class="border rounded px-3 py-2 focus:ring-2 focus:ring-[#FF6F00] text-[#4E342E] bg-[#FFF8F1]" />
+          </div>
+        </div>
+        <div class="flex-1">
+          <label class="block mb-1 font-semibold text-[#4E342E]">Ventas por usuario</label>
+          <select v-model="usuarioSeleccionado" @change="buscarEnFecha"
+            class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-[#FF6F00] text-[#4E342E] bg-[#FFF8F1]">
             <option value="" selected disabled>Selecciona</option>
-            <option
-              v-for="usuario in usuarios"
-              :key="usuario.id"
-              :value="usuario.id"
-            >
+            <option v-for="usuario in usuarios" :key="usuario.id" :value="usuario.id">
               {{ usuario.nombre }}
             </option>
-          </b-select>
-        </b-field>
-      </b-field>
+          </select>
+        </div>
+      </div>
     </div>
 
-    <div class="box">
-      <p class="title is-4 has-text-weight-bold has-text-grey">
-        <b-icon icon="account" size="is-medium" type="is-primary"> </b-icon>
-        Totales de ventas por usuario
-      </p>
-      <b-field grouped group-multiline>
-        <div
-          class="control"
-          v-for="usuario in ventasPorUsuario"
-          :key="usuario.nombre"
-        >
-          <b-taglist attached>
-            <b-tag size="is-large">{{ usuario.nombre }}</b-tag>
-            <b-tag size="is-large" type="is-info">${{ usuario.total }}</b-tag>
-          </b-taglist>
+    <!-- Totales por usuario -->
+    <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
+      <div class="flex items-center mb-4">
+        <i class="fas fa-user text-2xl mr-2 text-[#FF6F00]"></i>
+        <h2 class="text-xl font-bold text-[#4E342E]">Totales de ventas por usuario</h2>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <div v-for="usuario in ventasPorUsuario" :key="usuario.nombre"
+          class="flex items-center bg-[#FFF8F1] rounded px-3 py-2 shadow">
+          <span class="font-semibold text-[#4E342E] mr-2">{{ usuario.nombre }}</span>
+          <span class="font-bold text-[#FF6F00]">${{ usuario.total }}</span>
         </div>
-      </b-field>
+      </div>
     </div>
-    <b-table
-      :data="ventas"
-      :paginated="isPaginated"
-      :per-page="perPage"
-      :bordered="true"
-      :narrowed="true"
-      :current-page.sync="currentPage"
-      :pagination-simple="isPaginationSimple"
-      :pagination-position="paginationPosition"
-      :default-sort-direction="defaultSortDirection"
-      :pagination-rounded="isPaginationRounded"
-      :sort-icon="sortIcon"
-      :sort-icon-size="sortIconSize"
-      aria-next-label="Next page"
-      aria-previous-label="Previous page"
-      aria-page-label="Page"
-      aria-current-label="Current page"
-    >
-      <b-table-column field="id" label="#" searchable sortable v-slot="props">
-        {{ props.row.id }}
-      </b-table-column>
 
-      <b-table-column
-        field="idMesa"
-        label="Mesa"
-        searchable
-        sortable
-        v-slot="props"
-      >
-        Mesa # {{ props.row.idMesa }}
-      </b-table-column>
+    <!-- Tabla de ventas -->
+    <div class="bg-white rounded-xl shadow-lg p-4 overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead>
+          <tr>
+            <th class="px-4 py-2 text-left text-xs font-semibold text-[#4E342E] uppercase">#</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold text-[#4E342E] uppercase">Mesa</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold text-[#4E342E] uppercase">Fecha</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold text-[#4E342E] uppercase">Atendió</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold text-[#4E342E] uppercase">Cliente</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold text-[#4E342E] uppercase">Pago</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold text-[#4E342E] uppercase">Cambio</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold text-[#4E342E] uppercase">Total</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold text-[#4E342E] uppercase">Insumos</th>
+            <th class="px-4 py-2"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="venta in ventasPaginadas" :key="venta.id" class="hover:bg-[#FFF8F1]">
+            <td class="px-4 py-2">{{ venta.id }}</td>
+            <td class="px-4 py-2">Mesa #{{ venta.idMesa }}</td>
+            <td class="px-4 py-2">{{ venta.fecha }}</td>
+            <td class="px-4 py-2">{{ venta.atendio }}</td>
+            <td class="px-4 py-2">{{ venta.cliente }}</td>
+            <td class="px-4 py-2">${{ venta.pagado }}</td>
+            <td class="px-4 py-2">${{ venta.pagado - venta.total }}</td>
+            <td class="px-4 py-2 font-bold text-[#FF6F00]">${{ venta.total }}</td>
+            <td class="px-4 py-2">
+              <table class="min-w-full text-xs">
+                <thead>
+                  <tr>
+                    <th class="px-2 py-1 text-left font-semibold text-[#4E342E]">Código</th>
+                    <th class="px-2 py-1 text-left font-semibold text-[#4E342E]">Nombre</th>
+                    <th class="px-2 py-1 text-left font-semibold text-[#4E342E]">Cantidad</th>
+                    <th class="px-2 py-1 text-left font-semibold text-[#4E342E]">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="insumo in venta.insumos" :key="insumo.codigo">
+                    <td class="px-2 py-1">{{ insumo.codigo }}</td>
+                    <td class="px-2 py-1">{{ insumo.nombre }}</td>
+                    <td class="px-2 py-1">{{ insumo.cantidad }} x ${{ insumo.precio }}</td>
+                    <td class="px-2 py-1">${{ insumo.cantidad * insumo.precio }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+            <td class="px-4 py-2">
+              <button
+                class="flex items-center px-3 py-1 rounded bg-blue-600 hover:bg-blue-800 text-white font-semibold transition"
+                @click="imprimirComprobante(venta)" title="Imprimir ticket">
+                <i class="fas fa-print"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- Paginación -->
+      <div class="flex justify-end mt-4 gap-2">
+        <button class="px-3 py-1 rounded bg-orange-600 hover:bg-orange-700 text-white font-semibold"
+          :disabled="currentPage === 1" @click="currentPage--">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <span class="text-[#4E342E] font-semibold px-2">Página {{ currentPage }}</span>
+        <button class="px-3 py-1 rounded bg-orange-600 hover:bg-orange-700 text-white font-semibold"
+          :disabled="currentPage === totalPages" @click="currentPage++">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
 
-      <b-table-column
-        field="fecha"
-        label="Fecha"
-        searchable
-        sortable
-        v-slot="props"
-      >
-        {{ props.row.fecha }}
-      </b-table-column>
-
-      <b-table-column
-        field="atendio"
-        label="Atendió"
-        searchable
-        sortable
-        v-slot="props"
-      >
-        {{ props.row.atendio }}
-      </b-table-column>
-
-      <b-table-column
-        field="cliente"
-        label="Cliente"
-        searchable
-        sortable
-        v-slot="props"
-      >
-        {{ props.row.cliente }}
-      </b-table-column>
-
-      <b-table-column field="pagado" label="Pago" v-slot="props">
-        ${{ props.row.pagado }}
-      </b-table-column>
-
-      <b-table-column field="cambio" label="Cambio" sortable v-slot="props">
-        ${{ props.row.pagado - props.row.total }}
-      </b-table-column>
-
-      <b-table-column field="total" label="Total" sortable v-slot="props">
-        <strong>${{ props.row.total }}</strong>
-      </b-table-column>
-
-      <b-table-column field="insumos" label="Insumos" v-slot="props">
-        <b-table :data="props.row.insumos" :narrowed="true" class="is-size-7">
-          <b-table-column field="codigo" label="Código" v-slot="props">
-            {{ props.row.codigo }}
-          </b-table-column>
-          <b-table-column field="nombre" label="Nombre" v-slot="props">
-            {{ props.row.nombre }}
-          </b-table-column>
-          <b-table-column field="cantidad" label="Cantidad" v-slot="props">
-            {{ props.row.cantidad }} X ${{ props.row.precio }}
-          </b-table-column>
-          <b-table-column field="subtotal" label="Subtotal" v-slot="props">
-            ${{ props.row.cantidad * props.row.precio }}
-          </b-table-column>
-        </b-table>
-      </b-table-column>
-
-      <b-table-column field="acciones" label="" v-slot="props">
-        <div class="field is-grouped">
-          <b-button
-            type="is-info"
-            class="mb-1"
-            @click="imprimirComprobante(props.row)"
-          >
-            <b-icon icon="printer"></b-icon>
-          </b-button>
-        </div>
-      </b-table-column>
-    </b-table>
-    <ticket
-      @impreso="onImpreso"
-      :venta="this.ventaSeleccionada"
-      :insumos="insumosSeleccionados"
-      :datosLocal="datos"
-      :logo="logo"
-      v-if="mostrarTicket"
-    ></ticket>
-    <b-loading
-      :is-full-page="true"
-      v-model="cargando"
-      :can-cancel="false"
-    ></b-loading>
+    <!-- Ticket y loading -->
+    <ticket @impreso="onImpreso" :venta="this.ventaSeleccionada" :insumos="insumosSeleccionados" :datosLocal="datos"
+      :logo="logo" v-if="mostrarTicket" />
+    <b-loading :is-full-page="true" v-model="cargando" :can-cancel="false"></b-loading>
   </section>
 </template>
+
 <script>
 import HttpService from "../../Servicios/HttpService";
 import Utiles from "../../Servicios/Utiles";
@@ -230,7 +168,8 @@ export default {
     datos: {},
     ventaSeleccionada: {},
     insumosSeleccionados: [],
-    fechasSeleccionadas: [],
+    fechaInicio: "",
+    fechaFin: "",
     usuarioSeleccionado: "",
     filtros: {},
     cargando: false,
@@ -238,17 +177,20 @@ export default {
     ventasPorUsuario: [],
     totalVentas: 0,
     mostrarTicket: false,
-    isPaginated: true,
-    isPaginationSimple: false,
-    isPaginationRounded: true,
-    paginationPosition: "bottom",
-    defaultSortDirection: "asc",
-    sortIcon: "arrow-up",
-    sortIconSize: "is-small",
     currentPage: 1,
     perPage: 20,
     logo: null,
   }),
+
+  computed: {
+    totalPages() {
+      return Math.ceil(this.ventas.length / this.perPage) || 1;
+    },
+    ventasPaginadas() {
+      const start = (this.currentPage - 1) * this.perPage;
+      return this.ventas.slice(start, start + parseInt(this.perPage));
+    }
+  },
 
   mounted() {
     this.obtenerVentas();
@@ -257,7 +199,10 @@ export default {
 
   methods: {
     recargar() {
-      (this.fechasSeleccionadas = []), (this.filtros = {});
+      this.fechaInicio = "";
+      this.fechaFin = "";
+      this.usuarioSeleccionado = "";
+      this.filtros = {};
       this.obtenerVentas();
     },
 
@@ -279,11 +224,14 @@ export default {
     },
 
     buscarEnFecha() {
-      this.filtros = {
-        inicio: this.fechasSeleccionadas[0].toISOString().substring(0, 10),
-        fin: this.fechasSeleccionadas[1].toISOString().substring(0, 10),
-        idUsuario: this.usuarioSeleccionado,
-      };
+      this.filtros = {};
+      if (this.fechaInicio && this.fechaFin) {
+        this.filtros.inicio = this.fechaInicio;
+        this.filtros.fin = this.fechaFin;
+      }
+      if (this.usuarioSeleccionado) {
+        this.filtros.idUsuario = this.usuarioSeleccionado;
+      }
       this.obtenerVentas();
     },
 

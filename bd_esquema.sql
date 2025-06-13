@@ -1,54 +1,68 @@
-CREATE DATABASE botanero_ventas;
-USE botanero_ventas
-CREATE TABLE categorias(
+CREATE DATABASE Restaurante;
+USE Restaurante;
+
+CREATE TABLE rol (
+	id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+	nombre VARCHAR(100) NOT NULL
+);
+
+INSERT INTO rol (nombre) VALUES
+('Administrador'),
+('Cajero'),
+('Mesero');
+
+CREATE TABLE categorias (
 	id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
 	tipo ENUM("PLATILLO", "BEBIDA") NOT NULL,
 	nombre VARCHAR(50) NOT NULL,
 	descripcion VARCHAR(255)
 );
 
-CREATE TABLE insumos(
+CREATE TABLE insumos (
 	id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
 	codigo VARCHAR(100) NOT NULL,
 	nombre VARCHAR(100) NOT NULL,
 	descripcion VARCHAR(255) NOT NULL,
 	precio DECIMAL(6,2) NOT NULL,
 	tipo ENUM("PLATILLO", "BEBIDA") NOT NULL,
-	categoria BIGINT UNSIGNED NOT NULL
+	categoria BIGINT UNSIGNED NOT NULL,
+	FOREIGN KEY (categoria) REFERENCES categorias(id)
 );
 
-CREATE TABLE informacion_negocio(
+CREATE TABLE informacion_negocio (
 	nombre VARCHAR(100),
 	telefono VARCHAR(15),
-	numeroMesas TINYINT, 
+	numeroMesas TINYINT,
 	logo VARCHAR(255)
 );
 
-CREATE TABLE usuarios(
+CREATE TABLE usuarios (
 	id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
 	correo VARCHAR(100) NOT NULL,
 	nombre VARCHAR(100) NOT NULL,
 	telefono VARCHAR(20) NOT NULL,
-	password VARCHAR(255) NOT NULL
+	password VARCHAR(255) NOT NULL,
+	idRol BIGINT UNSIGNED NOT NULL,
+	FOREIGN KEY (idRol) REFERENCES rol(id)
 );
 
-CREATE TABLE ventas(
+CREATE TABLE ventas (
 	id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
 	idMesa TINYINT NOT NULL,
 	cliente VARCHAR(100),
 	fecha DATETIME NOT NULL,
 	total DECIMAL(6,2) NOT NULL,
 	pagado DECIMAL(6,2) NOT NULL,
-	idUsuario BIGINT UNSIGNED NOT NULL
+	idUsuario BIGINT UNSIGNED NOT NULL,
+	FOREIGN KEY (idUsuario) REFERENCES usuarios(id)
 );
 
-CREATE TABLE insumos_venta(
+CREATE TABLE insumos_venta (
 	id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
 	idInsumo BIGINT UNSIGNED NOT NULL,
 	precio DECIMAL(6,2) NOT NULL,
 	cantidad INT NOT NULL,
-	idVenta BIGINT UNSIGNED
+	idVenta BIGINT UNSIGNED,
+	FOREIGN KEY (idInsumo) REFERENCES insumos(id),
+	FOREIGN KEY (idVenta) REFERENCES ventas(id)
 );
-
-
-ALTER TABLE informacion_negocio ADD COLUMN logo VARCHAR(255);

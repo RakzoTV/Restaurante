@@ -2,127 +2,107 @@
   <div>
     <b-loading :is-full-page="true" v-model="cargando" :can-cancel="false"></b-loading>
 
-    <section class="hero is-hero-bar is-main-hero">
-      <div class="hero-body">
-        <div class="level">
-          <div class="level-left">
-            <div class="level-item is-hero-avatar-item">
-              <div class="image is-user-avatar">
-                <img src="../../assets/usuario.png" alt="" />
-              </div>
-            </div>
-          </div>
-          <div class="level-item is-hero-content-item">
-            <div>
-              <h1 class="title is-spaced">Perfil de {{ nombreUsuario }}</h1>
-            </div>
-          </div>
-          <div class="level-right">
-            <div class="level-item">
-              <b-button
-                type="is-primary"
-                size="is-large"
-                icon-left="lock"
-                class="is-pulled-right"
-                tag="router-link"
-                to="/cambiar-password"
-              >
-                Cambiar contraseña
-              </b-button>
-            </div>
+    <section class="bg-cover bg-center rounded-xl mb-8 p-6" style="background-image: url('../../assets/fondo.png');">
+      <div class="flex flex-col md:flex-row items-center justify-between">
+        <div class="flex items-center mb-4 md:mb-0">
+          <img src="../../assets/usuario.png" alt="" class="w-24 h-24 rounded-full border-4 border-orange-600 shadow" />
+          <div class="ml-6">
+            <h1 class="text-3xl font-bold text-[#4E342E]">Perfil de {{ nombreUsuario }}</h1>
           </div>
         </div>
+        <router-link
+          to="/cambiar-password"
+          class="inline-flex items-center px-6 py-3 rounded bg-orange-600 hover:bg-orange-700 text-white font-bold text-lg transition"
+        >
+          <i class="fas fa-lock mr-2"></i> Cambiar contraseña
+        </router-link>
       </div>
     </section>
-    <br />
-    <div class="columns is-desktop">
-      <div class="column is-one third">
-        <div class="card">
-          <header class="card-header">
-            <div class="card-header-title">
-              <b-icon icon="calendar-week"></b-icon>
-              Tus ventas de la semana
-            </div>
-            <span class="tag is-primary is-large is-pulled-right">
-              ${{ totalVentasSemana }}</span
-            >
-          </header>
-          <div class="card-content">
-            <div id="contenedor-semana">
-              <canvas id="grafica-semana"></canvas>
-            </div>
-          </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Ventas semana -->
+      <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col">
+        <div class="flex items-center mb-2">
+          <i class="fas fa-calendar-week text-2xl mr-2 text-orange-600"></i>
+          <span class="text-lg font-bold text-[#4E342E]">Tus ventas de la semana</span>
+          <span class="ml-auto bg-orange-600 text-white text-lg font-bold rounded px-4 py-1 shadow">
+            ${{ totalVentasSemana }}
+          </span>
+        </div>
+        <div id="contenedor-semana">
+          <canvas id="grafica-semana"></canvas>
         </div>
       </div>
-      <div class="column is-one third">
-        <div class="card">
-          <header class="card-header">
-            <div class="card-header-title">
-              <b-icon icon="calendar-month"></b-icon>
-              Tus ventas del mes
-            </div>
-            <span class="tag is-primary is-large is-pulled-right">
-              ${{ totalVentasMes }}</span
-            >
-          </header>
-          <div class="card-content">
-            <div class="field is-grouped">
-              <p class="control">
-                <b-select size="is-small" v-model="mesSeleccionado" @change.native="busquedaAvanzada('mes')">
-                  <option value="1">Enero</option>
-                  <option value="2">Febrero</option>
-                  <option value="3">Marzo</option>
-                  <option value="4">Abril</option>
-                  <option value="5">Mayo</option>
-                  <option value="6">Junio</option>
-                  <option value="7">Julio</option>
-                  <option value="8">Agosto</option>
-                  <option value="9">Septiembre</option>
-                  <option value="10">Octubre</option>
-                  <option value="11">Noviembre</option>
-                  <option value="12">Diciembre</option>
-                </b-select>
-              </p>
-              <p class="control">
-                <b-select size="is-small" v-model="anioSeleccionado" @change.native="busquedaAvanzada('anioMes')">
-                  <option v-for="anio in listaAnios" :key="anio" :value="anio">
-                    {{ anio }}
-                  </option>
-                </b-select>
-              </p>
-            </div>
-            <div id="contenedor-mes">
-              <canvas id="grafica-mes"></canvas>
-            </div>
-          </div>
+      <!-- Ventas mes -->
+      <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col">
+        <div class="flex items-center mb-2">
+          <i class="fas fa-calendar-alt text-2xl mr-2 text-orange-600"></i>
+          <span class="text-lg font-bold text-[#4E342E]">Tus ventas del mes</span>
+          <span class="ml-auto bg-orange-600 text-white text-lg font-bold rounded px-4 py-1 shadow">
+            ${{ totalVentasMes }}
+          </span>
+        </div>
+        <div class="flex gap-2 mb-2">
+          <select
+            v-model="mesSeleccionado"
+            @change="busquedaAvanzada('mes')"
+            class="border rounded px-2 py-1 focus:ring-2 focus:ring-orange-600 text-[#4E342E] bg-[#FFF8F1] text-sm"
+          >
+            <option value="1">Enero</option>
+            <option value="2">Febrero</option>
+            <option value="3">Marzo</option>
+            <option value="4">Abril</option>
+            <option value="5">Mayo</option>
+            <option value="6">Junio</option>
+            <option value="7">Julio</option>
+            <option value="8">Agosto</option>
+            <option value="9">Septiembre</option>
+            <option value="10">Octubre</option>
+            <option value="11">Noviembre</option>
+            <option value="12">Diciembre</option>
+          </select>
+          <select
+            v-model="anioSeleccionado"
+            @change="busquedaAvanzada('anioMes')"
+            class="border rounded px-2 py-1 focus:ring-2 focus:ring-orange-600 text-[#4E342E] bg-[#FFF8F1] text-sm"
+          >
+            <option v-for="anio in listaAnios" :key="anio" :value="anio">
+              {{ anio }}
+            </option>
+          </select>
+        </div>
+        <div id="contenedor-mes">
+          <canvas id="grafica-mes"></canvas>
         </div>
       </div>
-      <div class="column is-one third">
-        <div class="card">
-          <header class="card-header">
-            <div class="card-header-title">
-              <b-icon icon="calendar-blank"></b-icon>
-              Tus ventas del año
-            </div>
-            <span class="tag is-primary is-large is-pulled-right">
-              ${{ totalVentasAnio }}</span
-            >
-          </header>
-          <div class="card-content">
-            <b-select size="is-small" v-model="anioSeleccionadoGrafica" @change.native="busquedaAvanzada('anio')">
-              <option v-for="anio in listaAnios" :key="anio" :value="anio">
-                {{ anio }}
-              </option>
-            </b-select>
-            <div id="contenedor-anio">
-              <canvas id="grafica-anio"></canvas>
-            </div>
-          </div>
+      <!-- Ventas año -->
+      <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col">
+        <div class="flex items-center mb-2">
+          <i class="fas fa-calendar text-2xl mr-2 text-orange-600"></i>
+          <span class="text-lg font-bold text-[#4E342E]">Tus ventas del año</span>
+          <span class="ml-auto bg-orange-600 text-white text-lg font-bold rounded px-4 py-1 shadow">
+            ${{ totalVentasAnio }}
+          </span>
+        </div>
+        <div class="mb-2">
+          <select
+            v-model="anioSeleccionadoGrafica"
+            @change="busquedaAvanzada('anio')"
+            class="border rounded px-2 py-1 focus:ring-2 focus:ring-orange-600 text-[#4E342E] bg-[#FFF8F1] text-sm"
+          >
+            <option v-for="anio in listaAnios" :key="anio" :value="anio">
+              {{ anio }}
+            </option>
+          </select>
+        </div>
+        <div id="contenedor-anio">
+          <canvas id="grafica-anio"></canvas>
         </div>
       </div>
     </div>
   </div>
 </template>
+
 <script>
 import HttpService from "../../Servicios/HttpService";
 import Utiles from "../../Servicios/Utiles";
@@ -177,7 +157,6 @@ export default {
         case "anio":
           this.filtros.anioSeleccionadoGrafica = this.anioSeleccionadoGrafica
           break;
-        
       }
 
       this.obtenerDatos();
@@ -222,15 +201,3 @@ export default {
   },
 };
 </script>
-<style>
-section.hero.is-hero-bar.is-main-hero {
-  background-image: url("../../assets/fondo.png");
-  background-size: cover;
-}
-
-section.hero.is-hero-bar.is-main-hero img {
-  width: 6rem;
-  height: 6rem;
-  border-radius: 9999px;
-}
-</style>

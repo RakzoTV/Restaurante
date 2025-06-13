@@ -121,7 +121,27 @@
           </tr>
         </tbody>
       </table>
+      <div class="flex justify-center mt-4 gap-2">
+        <button
+          class="px-3 py-1 rounded bg-orange-600 hover:bg-orange-700 text-white font-semibold"
+          :disabled="currentPage === 1"
+          @click="currentPage--"
+        >
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <span class="text-[#4E342E] font-semibold px-2">Página {{ currentPage }}</span>
+        <button
+          class="px-3 py-1 rounded bg-orange-600 hover:bg-orange-700 text-white font-semibold"
+          :disabled="currentPage === totalPages"
+          @click="currentPage++"
+        >
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
     </div>
+
+    
+    
     <b-loading :is-full-page="true" v-model="cargando" :can-cancel="false"></b-loading>
 
     <!-- Modal para registrar insumo -->
