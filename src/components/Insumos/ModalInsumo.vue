@@ -14,7 +14,7 @@
         </button>
       </div>
       <datos-insumo
-        :insumo="insumo"
+        :insumo="insumoLocal"
         :es-edicion="esEdicion"
         @registrado="registrarYcerrar"
         @cancelar="$emit('update:visible', false)"
@@ -33,6 +33,19 @@ export default {
     visible: { type: Boolean, required: true },
     esEdicion: { type: Boolean, default: false },
     insumo: { type: Object, default: () => ({}) }
+  },
+  data() {
+    return {
+      insumoLocal: {}
+    }
+  },
+  watch: {
+    insumo: {
+      immediate: true,
+      handler(nuevo) {
+        this.insumoLocal = JSON.parse(JSON.stringify(nuevo));
+      }
+    }
   },
   methods: {
     registrarYcerrar(data) {

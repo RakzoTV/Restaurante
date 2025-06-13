@@ -93,7 +93,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="insumo in insumos" :key="insumo.id" class="hover:bg-[#FFF8F1]">
+          <tr v-for="insumo in insumosPaginados" :key="insumo.id" class="hover:bg-[#FFF8F1]">
             <td class="py-2 px-3">
               <i v-if="insumo.tipo === 'PLATILLO'" class="fas fa-hamburger text-[#FF6F00]"></i>
               <i v-if="insumo.tipo === 'BEBIDA'" class="fas fa-coffee text-[#4E342E]"></i>
@@ -121,6 +121,7 @@
           </tr>
         </tbody>
       </table>
+      <!-- Paginación similar a Categorías -->
       <div class="flex justify-center mt-4 gap-2">
         <button
           class="px-3 py-1 rounded bg-orange-600 hover:bg-orange-700 text-white font-semibold"
@@ -140,8 +141,6 @@
       </div>
     </div>
 
-    
-    
     <b-loading :is-full-page="true" v-model="cargando" :can-cancel="false"></b-loading>
 
     <!-- Modal para registrar insumo -->
@@ -172,15 +171,8 @@ export default {
     },
     categorias: [],
     cargando: false,
-    isPaginated: true,
-    isPaginationSimple: false,
-    isPaginationRounded: true,
-    paginationPosition: "bottom",
-    defaultSortDirection: "asc",
-    sortIcon: "arrow-up",
-    sortIconSize: "is-small",
     currentPage: 1,
-    perPage: 20,
+    perPage: 10,
     modalRegistro: false,
     modalEditar: false,
     nuevoInsumo: {
@@ -202,6 +194,27 @@ export default {
     }
   }),
 
+  computed: {
+    totalPages() {
+      return Math.ceil(this.insumos.length / this.perPage) || 1;
+    },
+    insumosPaginados() {
+      const start = (this.currentPage - 1) * this.perPage;
+      return this.insumos.slice(start, start + parseInt(this.perPage));
+    }
+  },
+
+  watch: {
+    perPage() {
+      this.currentPage = 1;
+    },
+    insumos() {
+      if (this.currentPage > this.totalPages) {
+        this.currentPage = this.totalPages;
+      }
+    }
+  },
+
   mounted() {
     this.obtenerInsumos();
   },
@@ -220,43 +233,44 @@ export default {
     },
 
     abrirModalEditar(insumo) {
-      // Haz una copia para evitar modificar el objeto original antes de guardar
       this.insumoEditar = { ...insumo };
       this.modalEditar = true;
     },
 
     recargarInsumos(insumo) {
-      // Registrar insumo en el backend
-      if (insumo) {
-        this.cargando = true;
-        HttpService.registrar(insumo, "registrar_insumo.php")
-          .then(() => {
+      this.cargando = true;
+      HttpService.registrar(insumo, "registrar_insumo.php")
+        .then(registrado => {
+          if (registrado) {
+            this.$buefy.toast.open("Insumo registrado correctamente");
             this.obtenerInsumos();
             this.modalRegistro = false;
-            this.cargando = false;
-            this.$buefy.toast.open("Insumo registrado correctamente");
-          });
-      } else {
-        this.obtenerInsumos();
-        this.modalRegistro = false;
-      }
+          } else {
+            this.$buefy.toast.open({
+              message: "No se pudo registrar el insumo.",
+              type: "is-danger"
+            });
+          }
+          this.cargando = false;
+        });
     },
 
     actualizarInsumo(insumo) {
-      // Actualizar insumo en el backend
-      if (insumo) {
-        this.cargando = true;
-        HttpService.actualizar(insumo, "editar_insumo.php")
-          .then(() => {
+      this.cargando = true;
+      HttpService.registrar(insumo, "editar_insumo.php")
+        .then(actualizado => {
+          if (actualizado) {
+            this.$buefy.toast.open("Insumo actualizado correctamente");
             this.obtenerInsumos();
             this.modalEditar = false;
-            this.cargando = false;
-            this.$buefy.toast.open("Insumo actualizado correctamente");
-          });
-      } else {
-        this.obtenerInsumos();
-        this.modalEditar = false;
-      }
+          } else {
+            this.$buefy.toast.open({
+              message: "No se pudo actualizar el insumo.",
+              type: "is-danger"
+            });
+          }
+          this.cargando = false;
+        });
     },
 
     busquedaAvanzada() {
@@ -293,7 +307,6 @@ export default {
     },
 
     editar(idInsumo) {
-      // Busca el insumo por id y abre el modal de edición
       const insumo = this.insumos.find(i => i.id === idInsumo);
       if (insumo) {
         this.abrirModalEditar(insumo);
@@ -304,7 +317,7 @@ export default {
       this.cargando = true;
       HttpService.obtenerConDatos(this.filtros, "obtener_insumos.php").then(
         (datos) => {
-          this.insumos = datos;
+          this.insumos = datos || [];
           this.cargando = false;
         }
       );

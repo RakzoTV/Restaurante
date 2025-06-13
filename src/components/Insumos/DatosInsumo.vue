@@ -5,7 +5,7 @@
         </ul>
         <b-field label="Tipo">
             <b-select v-model="localInsumo.tipo" @change.native="obtenerCategorias">
-                <option value="" disabled selected>Selecciona el tipo de insumo</option>
+                <option value="" disabled>Selecciona el tipo de insumo</option>
                 <option value="PLATILLO">Platillo</option>
                 <option value="BEBIDA">Bebida</option>
             </b-select>
@@ -26,7 +26,7 @@
 
         <b-field label="Categoría">
             <b-select v-model="localInsumo.categoria">
-                <option value="" selected disabled>Selecciona la categoría</option>
+                <option value="" disabled>Selecciona la categoría</option>
                 <option v-for="categoria in categorias" :key="categoria.id" :value="categoria.id">
                     {{ categoria.nombre }}
                 </option>
@@ -62,14 +62,14 @@ export default {
         return {
             errores: [],
             categorias: [],
-            localInsumo: { ...this.insumo }
+            localInsumo: this.copiarInsumo(this.insumo)
         }
     },
 
     watch: {
         insumo: {
             handler(newVal) {
-                this.localInsumo = { ...newVal }
+                this.localInsumo = this.copiarInsumo(newVal)
                 if (this.localInsumo.tipo) {
                     this.obtenerCategorias()
                 }
@@ -80,7 +80,20 @@ export default {
     },
 
     methods: {
+        copiarInsumo(obj) {
+            // Copia profunda para evitar problemas de referencia
+            return JSON.parse(JSON.stringify(obj || {
+                tipo: "",
+                codigo: "",
+                nombre: "",
+                descripcion: "",
+                categoria: "",
+                precio: ""
+            }))
+        },
+
         registrar() {
+            console.log("Click registrar");
             let datos = {
                 tipo: this.localInsumo.tipo,
                 codigo: this.localInsumo.codigo,
@@ -91,24 +104,22 @@ export default {
             }
             this.errores = Utiles.validar(datos)
             if (this.errores.length > 0) return
+            console.log("Emitiendo evento registrado", this.localInsumo);
             this.$emit("registrado", { ...this.localInsumo })
-            // Si es registro, limpia el formulario
             if (!this.esEdicion) {
-                this.localInsumo = {
-                    tipo: "",
-                    codigo: "",
-                    nombre: "",
-                    descripcion: "",
-                    categoria: "",
-                    precio: ""
-                }
+                this.localInsumo = this.copiarInsumo({})
             }
         },
 
         obtenerCategorias() {
+            if (!this.localInsumo.tipo) {
+                this.categorias = []
+                this.localInsumo.categoria = ""
+                return
+            }
             HttpService.obtenerConDatos(this.localInsumo.tipo, "obtener_categorias_tipo.php")
                 .then(resultado => {
-                    this.categorias = resultado
+                    this.categorias = resultado || []
                     const existe = this.categorias.some(cat => cat.id == this.localInsumo.categoria)
                     if (!existe) {
                         this.localInsumo.categoria = ""
